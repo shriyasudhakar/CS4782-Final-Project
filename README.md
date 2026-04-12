@@ -1,4 +1,4 @@
-# Paper: SteganoGAN: High Capacity Image Steganography with GANs by Zhang et al.
+# Paper: SteganoGAN: High Capacity Image Steganography with GANs
 Shriya Sudhakar, Kiran Mitra, Nidhi Soma, Niti Goyal
 
 ## Introduction
