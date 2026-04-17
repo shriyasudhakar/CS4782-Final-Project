@@ -73,7 +73,8 @@ def ssim(cover_image, stego_image):
 
   Returns: scalar SSIM value, closer to 1 is better
   """
-  metric = StructuralSimilarityIndexMeasure(data_range=2.0)
+  device = cover_image.device
+  metric = StructuralSimilarityIndexMeasure(data_range=2.0).to(device)
   return metric(stego_image, cover_image).item()
 
 def evaluate(encoder, decoder, dataloader, D, device="cpu"):
