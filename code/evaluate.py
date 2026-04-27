@@ -97,6 +97,7 @@ def evaluate(encoder, decoder, dataloader, D, device="cpu"):
   total_rs_bpp = 0.0
   total_psnr = 0.0
   total_ssim = 0.0
+  total_acc = 0.0
   num_batches = 0
 
   with torch.no_grad():
@@ -110,15 +111,18 @@ def evaluate(encoder, decoder, dataloader, D, device="cpu"):
       # encode and decode
       stego_image = encoder(cover_image, message)
       decoded_message = decoder(stego_image)
+      acc = ((decoded_message >= 0) == (message >= 0.5)).float().mean().item()
 
       # accumulate metrics
       total_rs_bpp += rs_bpp(D, message, decoded_message)
       total_psnr += psnr(cover_image, stego_image)
       total_ssim += ssim(cover_image, stego_image)
+      total_acc += acc
       num_batches += 1
 
   return {
     "RS-BPP": total_rs_bpp / num_batches,
     "PSNR": total_psnr / num_batches,
     "SSIM": total_ssim / num_batches,
+    "Acc": total_acc / num_batches,
   }
