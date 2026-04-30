@@ -90,7 +90,7 @@ D = 1
 # load model from checkpoint
 encoder_model = ResidualEncoder(D)
 decoder_model = Decoder(D)
-# assuming running from /code
+# assuming running from /code and checkpoint is downloaded
 PATH= "../checkpoints/residual_D1.pt"
 device = val_images.device
 print(f"Current device is {device}")
