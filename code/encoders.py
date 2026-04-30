@@ -3,6 +3,14 @@ from torch import nn
 
 class BasicEncoder(nn.Module):
     def __init__(self, D:int):
+        """
+        Parameters
+        ----------
+        
+        D: int
+            the number of bits to hide in each pixel of cover image
+
+        """
         super().__init__()
         self.conv1 = nn.Sequential(
             nn.Conv2d(3, 32, 3,1,"same"),
@@ -51,6 +59,14 @@ class ResidualEncoder(nn.Module):
     #     return cover_image + x
 
     def __init__(self, D:int):
+        """
+        Parameters
+        ----------
+        
+        D: int
+            the number of bits to hide in each pixel of cover image
+
+        """
         super().__init__()
         self.conv1 = nn.Sequential(
             nn.Conv2d(3, 32, 3,1,"same"),
@@ -93,11 +109,15 @@ class ResidualEncoder(nn.Module):
         return cover_image + x
     
 class DenseEncoder(nn.Module):
-    # def forward(self, cover_image, message):
-    #     x = super().forward(cover_image,message)
-    #     return cover_image + x
-
     def __init__(self, D:int):
+        """
+        Parameters
+        ----------
+        
+        D: int
+            the number of bits to hide in each pixel of cover image
+
+        """
         super().__init__()
         self.conv1 = nn.Sequential(
             nn.Conv2d(3, 32, 3,1,"same"),
