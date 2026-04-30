@@ -1,3 +1,4 @@
 data/*.zip
+code/__pycache__
 
 checkpoints
