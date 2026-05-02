@@ -1,1 +1,5 @@
 data/*.zip
+code/__pycache__
+data/DIV2K*
+
+checkpoints
