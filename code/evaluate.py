@@ -1,9 +1,10 @@
 import torch
 import torch.nn.functional as F
 from torchmetrics.image import StructuralSimilarityIndexMeasure
+from tqdm import tqdm
 
 """
-Evaluation functions for the encoder+decoder. 
+Evaluation functions for the encoder+decoder.
 - Loads checkpoints from training
 - Calculates metrics on validation set
 - Prints metrics
@@ -17,8 +18,8 @@ Evaluation functions for the encoder+decoder.
 # Generate a random message, encode it, then decode it
 # Compute the bit error rate p (fraction of bits the decoder gets wrong)
 # RS-BPP = D × (1 - 2p), where D is your data depth (bits per pixel attempted)
-# This tells you: given Reed-Solomon error correction, 
-# how many reliable bits per pixel can you actually transmit? 
+# This tells you: given Reed-Solomon error correction,
+# how many reliable bits per pixel can you actually transmit?
 # If your decoder has 10% error rate at D=6, then RS-BPP = 6 × (1 - 0.2) = 4.8
 
 #Metric 2: PSNR (Peak Signal-to-Noise Ratio)
@@ -26,31 +27,9 @@ Evaluation functions for the encoder+decoder.
 # Higher means better
 
 #Metric 3: SSIM (Structural Similarity Index)
-# Measures structural similarity between cover and stego images 
+# Measures structural similarity between cover and stego images
 # accounting for luminance, contrast, and structure
 #Values in [-1, 1], closer to 1 is better.
-
-def rs_bpp(D, message, decoded_message):
-  """
-  Inputs:
-  - D: how many bits you store per pixel
-  - message: the original random message N x D x H x W (binary 0s and 1s)
-  - decoded_message: raw decoder output N x D x H x W (floats/logits)
-
-  Returns: scalar RS-BPP value
-  """
-  # decoder outputs raw floats, so threshold to get predicted bits
-  predicted_bits = (decoded_message > 0).float()
-
-  # compare every entry in D x H x W across the batch
-  # wrong = 1 where they differ, 0 where they match
-  wrong = (predicted_bits != message).float()
-
-  # p = total wrong bits / total bits (single scalar across entire batch)
-  p = wrong.mean().item()
-
-  # RS-BPP formula: clamp to 0 if decoder is worse than random (p > 0.5)
-  return max(0.0, D * (1 - 2 * p))
 
 def psnr(cover_image, stego_image):
   """
@@ -86,22 +65,30 @@ def evaluate(encoder, decoder, dataloader, D, device="cpu"):
   - D: bits per pixel (must match what encoder/decoder were trained with)
   - device: "cpu" or "cuda"
 
-  Returns: dict with average RS-BPP, PSNR, SSIM across the validation set
+  Returns: dict with RS-BPP (aggregated over the whole val set) and
+           image-weighted average PSNR / SSIM.
+
+  Notes:
+  - RS-BPP is computed by summing wrong-bit counts across the entire val set
+    and applying the formula once. Per-batch averaging would inflate it
+    because of the max(0, ·) clamp (non-linear → mean(max(...)) ≠ max(mean(...))).
+  - PSNR / SSIM are weighted by batch size N so the smaller final batch
+    (e.g. 4 images out of 100) doesn't get over-weighted.
   """
-  
+
   #Switch the models from training mode to evaluation mode.
   #BatchNorm behaves differently during evaluation (uses running mean and variance)
   encoder.eval()
   decoder.eval()
 
-  total_rs_bpp = 0.0
-  total_psnr = 0.0
-  total_ssim = 0.0
-  total_acc = 0.0
-  num_batches = 0
+  total_wrong = 0
+  total_bits  = 0
+  psnr_sum = 0.0
+  ssim_sum = 0.0
+  total_images = 0
 
   with torch.no_grad():
-    for cover_image in dataloader: #cover_image is shape (N, 3, H, W)
+    for cover_image in tqdm(dataloader, desc="Evaluating"): #cover_image is shape (N, 3, H, W)
       cover_image = cover_image.to(device)
       N, _, H, W = cover_image.shape
 
@@ -111,18 +98,26 @@ def evaluate(encoder, decoder, dataloader, D, device="cpu"):
       # encode and decode
       stego_image = encoder(cover_image, message)
       decoded_message = decoder(stego_image)
-      acc = ((decoded_message >= 0) == (message >= 0.5)).float().mean().item()
 
-      # accumulate metrics
-      total_rs_bpp += rs_bpp(D, message, decoded_message)
-      total_psnr += psnr(cover_image, stego_image)
-      total_ssim += ssim(cover_image, stego_image)
-      total_acc += acc
-      num_batches += 1
+      # accumulate raw bit-error counts so we can apply the RS-BPP formula
+      # ONCE at the end (avoids the max(0, ·) clamp bias from per-batch averaging)
+      predicted_bits = (decoded_message > 0).float()
+      total_wrong += (predicted_bits != message).sum().item()
+      total_bits  += message.numel()
+
+      # weight image-level metrics by batch size so the trailing partial batch
+      # doesn't get over-weighted
+      psnr_sum += psnr(cover_image, stego_image) * N
+      ssim_sum += ssim(cover_image, stego_image) * N
+      total_images += N
+
+  p = total_wrong / total_bits
+  rs_bpp = max(0.0, D * (1 - 2 * p))
+  acc = 1.0 - p
 
   return {
-    "RS-BPP": total_rs_bpp / num_batches,
-    "PSNR": total_psnr / num_batches,
-    "SSIM": total_ssim / num_batches,
-    "Acc": total_acc / num_batches,
+    "RS-BPP": rs_bpp,
+    "PSNR": psnr_sum / total_images,
+    "SSIM": ssim_sum / total_images,
+    "Acc": acc,
   }

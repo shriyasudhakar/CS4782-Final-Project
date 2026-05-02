@@ -8,10 +8,13 @@ from PIL import Image
 
 class Div2KDataset(Dataset):
     def __init__(self, root, transforms=None):
-        self.path_to_img = []
-        for f in os.listdir(root):
-            if f.endswith('png'):
-                self.path_to_img.append(os.path.join(root, f))
+        # Sort filenames so iteration order is deterministic across runs / OSes.
+        # os.listdir() returns files in arbitrary order otherwise.
+        self.path_to_img = [
+            os.path.join(root, f)
+            for f in sorted(os.listdir(root))
+            if f.endswith('png')
+        ]
 
         self.transforms = transforms
 
