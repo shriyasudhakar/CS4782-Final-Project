@@ -130,7 +130,7 @@ class Trainer:
             # Lr (realness loss): Critic score of generated image
             Lr = self.critic(fake).mean()
 
-            loss = Ld + Ls + Lr
+            loss = Ld + 100.0 * Ls + Lr
 
             self.enc_dec_opt.zero_grad()
             loss.backward()
