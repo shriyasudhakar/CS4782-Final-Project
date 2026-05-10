@@ -16,12 +16,18 @@ We also used StegExpose, a classic open-source steganalysis tool, to evaluate th
 ## GitHub Contents
 Important folders:
 /code - contains main components of model like encoders, decoders, and critic
+
 /data - DIV2K train, validation, and test data used for evaluation
+
 /results - separate folder to replicate results demonstrated in paper 
 
 ## Re-implementation Details
 
+
 ## Reproduction Steps
+Run our training script in /code/train.ipynb which will download data locally and install necessary libraries, preprocess images, and run the training loop. It also has all our model architecture and supports wandb logging for evaluation metrics. Our notebook does multiple runs with different Encoders and different depths so you can reproduce our table of results.
+
+We used a T4 GPU in Google Colab. Training for 32 epochs took about 80 minutes.
 
 ## Conclusion
 We learned:
@@ -31,7 +37,9 @@ We learned:
 - AttentionEncoder likely will outperform the paper's other encoder methods
 ## References
 [1] Zhang, Kevin Alex, et al. "SteganoGAN: High Capacity Image Steganography with GANs." arXiv preprint arXiv:1901.03892 (2019).
+
 [2] Boehm, Benedikt. "Stegexpose - A Tool for Detecting LSB Steganography." arXiv preprint arXiv:1410.6656 (2014).
+
 [3] Liu, Ze e, et al. “Swin Transformer: Hierarchical Vision Transformer using Shifted Windows.” arXiv preprint arXiv:2103.14030 (2021)
 
 ## Acknowledgements
