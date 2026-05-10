@@ -22,14 +22,23 @@ Important folders:
 /results - separate folder to replicate results demonstrated in paper 
 
 ## Re-implementation Details
-
+- Implemented Basic, Residual, Dense Encoders, Dense Decoder, Critic architecture from Paper
+- Trained on HR Div2K Images
+- Training loss: Min MSE + decoder error + critic score
+    - Critic trained by min(real image - steganographic image)
+- Added Attention Encoder
+- Evaluated on Accuracy, RS-BPP, PSNR, SSIM similar to paper
 
 ## Reproduction Steps
 Run our training script in /code/train.ipynb which will download data locally and install necessary libraries, preprocess images, and run the training loop. It also has all our model architecture and supports wandb logging for evaluation metrics. Our notebook does multiple runs with different Encoders and different depths so you can reproduce our table of results.
 
-To reproduce the StegExpose plot, you will have to download the tool code: https://github.com/b3dk7/stegexpose. You can use the 100 validation images in /data/coco_val_images. Run /data/crop_real_images.py to process the real images, and code/generate_eval_images.py to generate steganographic versions. Then combine the first 50 real images and the last 50 steganographic images to create your test set. You can then run StegExpose with your the test image folder.
+To reproduce the StegExpose plot, you will have to download the tool code: https://github.com/b3dk7/stegexpose. You can use the 100 validation images in /data/coco_val_images. Run /data/crop_real_images.py to process the real images, and code/generate_eval_images.py to generate steganographic versions. Then combine the first 50 real images and the last 50 steganographic images to create your test set. (We also provide our test sets as test_dense1, test_dense3, test_dense6)
+
+ You can then run StegExpose with your the test image folder and use /data/plot_stegexpose_rocauc.py to create the ROC AUC plot.
 
 We used a T4 GPU in Google Colab. Training for 32 epochs took about 80 minutes.
+
+## Results/Insights
 
 ## Conclusion
 We learned:

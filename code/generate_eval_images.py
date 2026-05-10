@@ -1,6 +1,6 @@
 import torch
 from decoder import Decoder
-from encoders import DenseEncoder, ResidualEncoder
+from encoders import DenseEncoder, ResidualEncoder, BasicEncoder
 from datasetloader import DataLoader, Div2KDataset
 import urllib.request
 from torchvision import transforms
@@ -13,7 +13,7 @@ def _denorm(x):
     # undo image normalization so we can visualize them during wandb logging
     return (x * 0.5 + 0.5).clamp(0, 1)
 
-def _qualitative_samples_dict(encoder, decoder, fixed_batch, D, device, save_dir="../data/DIV2K_valid_HR_outputs"):
+def _qualitative_samples_dict(encoder, decoder, fixed_batch, D, device, encoder_type="Dense", save_dir=f"../data/DIV2K_valid_HR_outputs"):
     """
     Saves cover images and generated encoded images to evaluate on StegExpose.
 
@@ -43,13 +43,13 @@ def _qualitative_samples_dict(encoder, decoder, fixed_batch, D, device, save_dir
         residual_v = (stego_v - cover_v).abs().mul(10).clamp(0, 1)
         output_dir = Path(save_dir)
         os.makedirs(output_dir, exist_ok=True)
-        os.makedirs(output_dir / f"D={D}" / "stego", exist_ok=True)
-        os.makedirs(output_dir / f"D={D}" / "residual", exist_ok=True)
+        os.makedirs(output_dir / f"{encoder_type}_D={D}" / "stego", exist_ok=True)
+        os.makedirs(output_dir / f"{encoder_type}_D={D}" / "residual", exist_ok=True)
 
         # Loop through the batch and save each image
         for i in range(cover_v.size(0)):
-            vutils.save_image(stego_v[i], output_dir / f"D={D}" / "stego" / f"stego_image_{i}.png")
-            vutils.save_image(residual_v[i], output_dir / f"D={D}" / "residual" / f"residual_image_{i}.png")
+            vutils.save_image(stego_v[i], output_dir / f"{encoder_type}_D={D}" / "stego" / f"stego_image_{i}.png")
+            vutils.save_image(residual_v[i], output_dir / f"{encoder_type}_D={D}" / "residual" / f"residual_image_{i}.png")
 
 def _load_validation_data(output_path):
     url = "http://data.vision.ee.ethz.ch/cvl/DIV2K/DIV2K_valid_HR.zip"
@@ -86,17 +86,17 @@ for images in val_loader:
     # 'images' is a batch of tensors; 'labels' are the class indices
 
 # num of bits to hide in pixel
-D = 1
+D = 6
 # load model from checkpoint
-encoder_model = ResidualEncoder(D)
+encoder_model = BasicEncoder(D)
 decoder_model = Decoder(D)
 # assuming running from /code and checkpoint is downloaded
-PATH= "../checkpoints/residual_D1.pt"
+PATH= "../checkpoints/basic_D6.pt"
 device = val_images.device
 print(f"Current device is {device}")
 checkpoint = torch.load(PATH, weights_only=True, map_location=device)
 encoder_model.load_state_dict(checkpoint['encoder_state_dict'])
 decoder_model.load_state_dict(checkpoint['decoder_state_dict'])
 
-_qualitative_samples_dict(encoder_model, decoder_model, val_images, D, device)
+_qualitative_samples_dict(encoder_model, decoder_model, val_images, D, device, encoder_type="Basic", save_dir="../data/DIV2K_valid_HR_outputs")
         
