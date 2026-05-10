@@ -27,6 +27,8 @@ Important folders:
 ## Reproduction Steps
 Run our training script in /code/train.ipynb which will download data locally and install necessary libraries, preprocess images, and run the training loop. It also has all our model architecture and supports wandb logging for evaluation metrics. Our notebook does multiple runs with different Encoders and different depths so you can reproduce our table of results.
 
+To reproduce the StegExpose plot, you will have to download the tool code: https://github.com/b3dk7/stegexpose. You can use the 100 validation images in /data/coco_val_images. Run /data/crop_real_images.py to process the real images, and code/generate_eval_images.py to generate steganographic versions. Then combine the first 50 real images and the last 50 steganographic images to create your test set. You can then run StegExpose with your the test image folder.
+
 We used a T4 GPU in Google Colab. Training for 32 epochs took about 80 minutes.
 
 ## Conclusion
