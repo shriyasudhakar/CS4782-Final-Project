@@ -25,9 +25,6 @@ STEGO_OUT = Path("../data/kilian_encoded.png")
 RESIDUAL_OUT = Path("../data/kilian_residual.png")
 USE_RS = False  # set False to skip Reed-Solomon (faster, less error-resilient)
 
-
-# ---------- 1. build encoder + decoder, load trained weights ----------
-
 if torch.cuda.is_available():
     device = torch.device("cuda")
 elif torch.backends.mps.is_available():
@@ -46,9 +43,6 @@ encoder.eval()
 decoder.eval()
 print(f"Encoder: {ENCODER_CLS} Depth={DEPTH}")
 
-
-# ---------- 2. load the cover image as a (1, 3, H, W) tensor in [-1, 1] ----------
-
 img = Image.open(IMAGE_PATH).convert("RGB")
 #convert pixel values from [0,255] to [-1,1]
 arr = np.asarray(img, dtype=np.float32) / 127.5 - 1.0
@@ -56,9 +50,6 @@ arr = np.asarray(img, dtype=np.float32) / 127.5 - 1.0
 cover = torch.from_numpy(arr).permute(2, 0, 1).unsqueeze(0).to(device)
 _, _, H, W = cover.shape
 print(f"image: {IMAGE_PATH.name}  H={H}  W={W}  capacity={H * W * DEPTH} bits")
-
-
-# ---------- 3. turn MESSAGE into a bit list: utf8 -> zlib compression -> reed-solomon -> bits ----------
 
 #Reed-Soloman error corrector with 250 parity bytes
 #so that decoder can recover message even if 125 bytes get corrupted
@@ -81,9 +72,6 @@ for byte in encoded_bytes:
 message_bits += [0] * 32
 print(f"[msg] '{MESSAGE}' -> {len(message_bits) - 32} bits (+32 zeros)")
 
-
-# ---------- 4. tile the message bits repeatedly to fill (D, H, W), then run the encoder ----------
-
 capacity = H * W * DEPTH
 print(f"image capacity: {capacity} bits  |  message requires: {len(message_bits)} bits  |  tiles: {capacity // len(message_bits)}x")
 if len(message_bits) > capacity:
@@ -98,9 +86,6 @@ print(f"[tile] message payload shape {tuple(payload.shape)}")
 #produce the stego image. clip any pixels that drift outside the valid range
 with torch.no_grad():
     stego = encoder(cover, payload).clamp(-1.0, 1.0)
-
-
-# ---------- 5. save the stego PNG (uint8 quantization happens here) ----------
 
 #convert stego tensor to a saveable image
 # remove the batch dimension, move to CPU, reshape to (H,W,3), convert to numpy
@@ -118,9 +103,6 @@ residual_arr = (residual_arr * 255).round().astype(np.uint8)
 Image.fromarray(residual_arr).save(RESIDUAL_OUT)
 print(f"residual image saved to {RESIDUAL_OUT}")
 
-
-# ---------- 6. reload the PNG and run the decoder (mimics a real recipient) ----------
-
 #convert image to a tensor with values in [-1,1] 
 img2 = Image.open(STEGO_OUT).convert("RGB")
 arr2 = np.asarray(img2, dtype=np.float32) / 127.5 - 1.0
@@ -131,9 +113,6 @@ stego_reloaded = torch.from_numpy(arr2).permute(2, 0, 1).unsqueeze(0).to(device)
 with torch.no_grad():
     logits = decoder(stego_reloaded)
     decoded_bits = (logits.view(-1) > 0).int().cpu().numpy().tolist()
-
-
-# ---------- 7. bits -> bytes -> split on 4 zero bytes -> RS-decode each -> majority vote ----------
 
 decoded_bytes = bytearray()
 for i in range(len(decoded_bits) // 8):
@@ -157,9 +136,6 @@ for chunk in decoded_bytes.split(b"\x00\x00\x00\x00"):
         continue
 
 recovered = candidates.most_common(1)[0][0] if candidates else None
-
-
-# ---------- 8. report ----------
 
 print()
 correct_bits = sum(a == b for a, b in zip(payload_bits, decoded_bits))

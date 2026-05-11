@@ -38,9 +38,6 @@ And saves these folders:
 
 """
 
-# --------------------------------------------------------------------- #
-# Configuration: edit these to rerun on a different model / D.           #
-# --------------------------------------------------------------------- #
 # Architecture: one of "basic", "residual", "dense"
 ARCH = "basic"
 # Bits hidden per pixel (must match the checkpoint).
