@@ -31,7 +31,7 @@ Important folders:
 - `critic.py` - contains the complete critic implementation
 - `datasetloader.py` - loads in data (from a given data directory), and performs transformations (such as cropping) as described in the paper
 - `evaluate.py` - contains evluation functions for the 4 metrics: Decoding Accuracy, Reed Solomon Bits Per Pixel (RS-BPP), Peak Signal to Noise Ratio (PSNR), and Structural Similarity Index (SSIM)
-- `encode_decode_message.py` -
+- `encode_decode_message.py` - end-to-end demonstration that encodes an English message into a cover image using a trained encoder, saves the stego image and residual, then decodes and verifies recovery with bit accuracy reporting
 - `generate_eval_images.py` - given a directory of cover images, generates steganographic versions and residuals for visualization
 - `grayscale_blur_ablation.py` - performs our model robustness experiment, where we provide grayscale and blurred images to the model to understand (1) whether the model is able to perform on OOD images and (2) how the model hides messages in these new types of images
 - `plot_stegexpose_rocauc.py` - given output CSV from StegExpose of detection results, plots the ROC AUC curve for the Dense model at different depths. May have to change path to match local location of StegExpose

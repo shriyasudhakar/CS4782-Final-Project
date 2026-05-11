@@ -1,5 +1,5 @@
 """
-End-to-end English-message round trip through a trained SteganoGAN encoder + decoder.
+End-to-end demonstration encoding an English message through a trained SteganoGAN encoder + decoder.
 `python encode_decode_message.py`
 """
 
@@ -17,13 +17,13 @@ from encoders import BasicEncoder, ResidualEncoder, DenseEncoder
 
 
 MODEL_PATH = Path("../checkpoints/basic_D6.pt")
-ENCODER_CLS = ResidualEncoder   # BasicEncoder | ResidualEncoder | DenseEncoder
+ENCODER_CLS = BasicEncoder   # BasicEncoder | ResidualEncoder | DenseEncoder
 DEPTH = 6                       # must match what the checkpoint was trained with
-IMAGE_PATH = Path("../data/kilian.png")
+IMAGE_PATH = Path("../data/profs/kilian.png")
 MESSAGE = "The rain began three hours before dusk and showed no intention of stopping. By the time the last bus left the mountain road, the village of Black Hollow had disappeared behind a curtain of silver water. Roofs blurred. Pine trees bent like listeners leaning toward a secret. The river beyond the bridge swelled dark and restless beneath the storm. Inside the station café, Mira Vale counted the same coins three times. Not because she needed to. Because counting kept her from thinking. Youll wear grooves into them, said the old owner from behind the counter. Mira slid the coins into her pocket. Wouldn’t be the worst thing I’ve ruined. The owner snorted softly. You’re twenty-four. You talk like a widow. Maybe I’m practicing. The café smelled of wet wool, burnt coffee, and cedar smoke drifting from the stove. Outside, thunder rolled through the valley with enough force to rattle the windows. No more customers would come tonight. No one traveled to Black Hollow during flood season unless they had nowhere else to go. Mira knew the feeling. She rose from her booth and gathered the stack of untouched newspapers from the corner table. Her shift had ended an hour ago, but she lingered every evening now, unwilling to return to the little house at the edge of the woods. It had been her father’s house once. Then his grave. Then her inheritance. Funny how places changed names without changing shape. You should head home before the river climbs higher, the owner warned. I’ll survive. That confidence is how mountains kill people. Mira pulled on her coat and stepped into the storm. Rain hammered the earth so hard it bounced."
-STEGO_OUT = Path("../data/kilian_encoded.png")
+STEGO_OUT = Path("../data/profs/kilian_encoded.png")
 RESIDUAL_OUT = Path("../data/kilian_residual.png")
-USE_RS = False  # set False to skip Reed-Solomon (faster, less error-resilient)
+USE_RS = True  # set False to optionally skip Reed-Solomon
 
 if torch.cuda.is_available():
     device = torch.device("cuda")
@@ -135,14 +135,17 @@ for chunk in decoded_bytes.split(b"\x00\x00\x00\x00"):
     except Exception:
         continue
 
+#majority vote
+#tally how many times each decoded text string appears across all the repeated tiles in the image
+# and pick the single most frequently recovered string
 recovered = candidates.most_common(1)[0][0] if candidates else None
 
 print()
 correct_bits = sum(a == b for a, b in zip(payload_bits, decoded_bits))
 total_bits = len(payload_bits)
-print("=" * 60)
+print("-" * 60)
 print(f"original:   {MESSAGE!r}")
 print(f"recovered:  {recovered!r}")
-print(f"match:      {recovered == MESSAGE}")
+print(f"exact match:      {recovered == MESSAGE}")
 print(f"bit accuracy: {correct_bits}/{total_bits} ({100 * correct_bits / total_bits:.2f}%)")
-print("=" * 60)
+print("-" * 60)
