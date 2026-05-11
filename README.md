@@ -1,5 +1,5 @@
 # Paper: SteganoGAN: High Capacity Image Steganography with GANs
-Shriya Sudhakar, Kiran Mitra, Nidhi Soma, Niti Goyal
+Shriya Sudhakar (ss3576), Kiran Mitra (km936), Nidhi Soma (ns848), Niti Goyal (ng459)
 
 ## Introduction
 Image steganography is at the intersection of security and computer vision, where the main goal is to be able to hide secret messages inside images imperceptibly. Encoding binary data into natural images is quite difficult due to the need of balancing message capacity, visual authenticity, and evasion of steganographic detection tools.
