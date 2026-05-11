@@ -27,15 +27,22 @@ Important folders:
 - `attn_encoder.py` - contains the implementation of our novel attention encoder
 - `attn_decoder.py` - contains the implementation of our novel attention decoder
 - `decoder.py` - contains the main decoder that the paper described
+- `crop_real_images.py` - processes real images to be normalized and center cropped to 360x360 to match steganographic generation. Should be run when making folders for StegExpose
 - `critic.py` - contains the complete critic implementation
 - `datasetloader.py` - loads in data (from a given data directory), and performs transformations (such as cropping) as described in the paper
 - `evaluate.py` - contains evluation functions for the 4 metrics: Decoding Accuracy, Reed Solomon Bits Per Pixel (RS-BPP), Peak Signal to Noise Ratio (PSNR), and Structural Similarity Index (SSIM)
 - `encode_decode_message.py` -
-- `generate_eval_images.py` -
+- `generate_eval_images.py` - given a directory of cover images, generates steganographic versions and residuals for visualization
 - `grayscale_blur_ablation.py` - performs our model robustness experiment, where we provide grayscale and blurred images to the model to understand (1) whether the model is able to perform on OOD images and (2) how the model hides messages in these new types of images
+- `plot_stegexpose_rocauc.py` - given output CSV from StegExpose of detection results, plots the ROC AUC curve for the Dense model at different depths. May have to change path to match local location of StegExpose
 
 /data - mainly contains DIV2K validation, and test data used for evaluation
-- since the datasets are too large to upload to github, we've included instructions on how to download the data in the README.md in the /data folder
+- since the full datasets are too large to upload to github, we've included instructions on how to download the data in the README.md in the /data folder
+- `/DIV2K_valid_HR` - contains our validation dataset of 100 images from DIV2K used to evaluate our main table of metrics
+- `/coco_val_images` - contains the 100 images from COCO used for StegExpose evaluation. Also containts a notebook `coco_100_images.ipynb` to download these images.
+- `profs` - contains images of our professors! (used in our poster)
+- `profs_outputs/Dense_D=1` - contains steganographic images and residuals for our professors with the Dense model at Depth=1 (also used in our poster)
+- `test_dense1`, `test_dense3`, `test_dense6` - contains the processed COCO cover and steganographic images used for our StegExpose evaluation
 
 /results
 - contains our main replication of table 1 (`table_metrics.png`) along with various training experiments (scaling MSE and removing critic), as well as results from the StegExpose tool (`stegexpose.png`).
@@ -44,17 +51,19 @@ Important folders:
 - `SteganoGAN CS 4782.pdf` contains our poster that was presented at the final poster session
 
 /report
-- `steganogan_twopager.pdf` contains our final report and analysis
+- `steganogan_2page_report.pdf` contains our final report and analysis
 
 ## Re-implementation Details
 We implemented the core encoder, decoder, critic framework. The encoder hides a binary message inside a provided cover image, the decoder recovers said message, and a critic (discriminator in GANs), pushes images to look like real images. We trained three encoder variances: Basic (sequential convolutions), Residual (adds cover image as skip connection), and Dense (concatenates intermediate feature maps). We implemented the DenseDecoder (only one decoder in paper, uses convolutions), Critic (also uses convolutions). We trained on the DIV2K dataset (800 train, 100 validation images) for 32 epochs with Adam at lr=1e-4. We evaluated 4 different accuracy metrics (Decoder Accuracy, RS-BPP, PSNR, SSIM) across 3 data depths D={1, 3, 6}. Initially during training, we noticed that while our Acc and RS-BPP metrics were high, PSNR and SSIM (image realness) were lower than expected (as compared to the paper). We performed ablations modifying the loss (100x MSE scaling, critic removal) and noticed much improved performance, meeting the paper's results on all 4 metrics. Beyond reproducing these main results from the paper, we also introduce a novel Attention encoder and decoder, which extends the existing Dense architecture with Window Multi-Head Self Attention (8x8 windows, 3 heads), and also performs the best compared to the 3 architectures proposed initially. We evaluated the robustness of our models to image distribution shifts (StegExpose on COCO images), and tested adaptability on grayscale and blurred images.
 
 ## Reproduction Steps
-To train your own SteganoGAN, run our training script in /code/train.ipynb which will download the Div2K data locally and install necessary libraries, preprocess images, and run the training loop. To train with our novel attention encoder/decoder, use /code/train_attentionencoder.ipynb It also has all our model architecture and supports wandb logging for evaluation metrics. Our notebook does multiple runs with different Encoders and different depths so you can reproduce our table of results or make your own by changing the list of configs in the config loop in the last cell. You will need a wandb login and API key before beginning and to change SAVE_DIR to the correct GDrive path in which you would like to save the model weights.
+To train your own SteganoGAN, run our training script in /code/train.ipynb which will download the Div2K data locally and install necessary libraries, preprocess images, and run the training loop. To train with our novel attention encoder/decoder, use /code/train_attentionencoder.ipynb. It also has all our model architecture and supports wandb logging for evaluation metrics. Our notebook does multiple runs with different Encoders and different depths so you can reproduce our table of results or make your own by changing the list of configs in the config loop in the last cell. You will need a wandb login and API key before beginning and to change SAVE_DIR to the correct GDrive path in which you would like to save the model weights.
 
-To reproduce the StegExpose plot, you will have to download the tool code: https://github.com/b3dk7/stegexpose. You can use the 100 validation images in /data/coco_val_images. Run /data/crop_real_images.py to process the real images, and code/generate_eval_images.py to generate steganographic versions. Then combine the first 50 real images and the last 50 steganographic images to create your test set. (We also provide our test sets as test_dense1, test_dense3, test_dense6)
+To reproduce the StegExpose plot, you will have to download the tool code: https://github.com/b3dk7/stegexpose. You can use the 100 validation images in /data/coco_val_images. Run /code/crop_real_images.py to process the real images, and code/generate_eval_images.py to generate steganographic versions (you may have to modify the paths for your local setup). Then combine the first 50 real images and the last 50 steganographic images to create your test set. 
 
- You can then run StegExpose with your the test image folder and use /data/plot_stegexpose_rocauc.py to create the ROC AUC plot.
+We also provide the test sets we used for our ROC AUC plot as test_dense1, test_dense3, test_dense6.
+
+ You can then run StegExpose with your the test image folder and use /code/plot_stegexpose_rocauc.py to create your ROC AUC plot.
 
 We used a T4 GPU in Google Colab. Training for 32 epochs took about 80 minutes per model config.
 
@@ -78,9 +87,13 @@ Our implementation of SteganoGAN successfully replicates and even improves upon 
 
 ## References
 [1] Zhang, Kevin Alex, et al. "SteganoGAN: High Capacity Image Steganography with GANs." arXiv preprint arXiv:1901.03892 (2019).
+
 [2] Boehm, Benedikt. "Stegexpose - A Tool for Detecting LSB Steganography." arXiv preprint arXiv:1410.6656 (2014).
+
 [3] Liu, Ze, et al. “Swin Transformer: Hierarchical Vision Transformer using Shifted Windows.” arXiv preprint arXiv:2103.14030 (2021).
+
 [4] Ignatov, Andrey and Timofte, Radu, et al. “PIRM challenge on perceptual image enhancement on smartphones: report”. In European Conference on Computer Vision (ECCV) Workshops (2019).
+
 [5] Lin, T., et al. “Microsoft COCO: common objects in context.” arXiv preprint arXiv:1405.0312 (2014). 
 
 ## Acknowledgements
