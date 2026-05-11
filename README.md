@@ -4,9 +4,9 @@ Shriya Sudhakar (ss3576), Kiran Mitra (km936), Nidhi Soma (ns848), Niti Goyal (n
 ## Introduction
 Image steganography is at the intersection of security and computer vision, where the main goal is to be able to hide secret messages inside images imperceptibly. Encoding binary data into natural images is quite difficult due to the need of balancing message capacity, visual authenticity, and evasion of steganographic detection tools.
 
-This repository reimplements [SteganoGAN: High Capcaity Image Steganography with GANs](https://arxiv.org/pdf/1901.03892) by Zhang et. al, 2019, which introduces a GAN-based method for high-capacity image steganography. The encoder hides a message in the cover image, while a decoder recoveres it. The critic encourages steganographic images to look indistinguishable from the original cover image. The authors test three types of encoders (Basic, Residual, dense), and achieves a record payload of 4.4 bits per pixel for natural images from multiple datasets that evade detection by tradiditonal and deep-learning beased steganalysis tools.
+This repository reimplements [SteganoGAN: High Capacity Image Steganography with GANs](https://arxiv.org/pdf/1901.03892) by Zhang et al., 2019, which introduces a GAN-based method for high-capacity image steganography. The encoder hides a message in the cover image, while a decoder recovers it. The critic encourages steganographic images to look indistinguishable from the original cover image. The authors test three types of encoders (Basic, Residual, Dense), and achieve a record payload of 4.4 bits per pixel for natural images from multiple datasets that evade detection by traditional and deep-learning-based steganalysis tools.
 
-In addition to reproducing their main result on the DIV2K dataset, we introduce a novel attention-based encoder and decoder that suprasses the paper's initial results, and also perofrm loss ablations, and model robustness experiments.
+In addition to reproducing their main result on the DIV2K dataset, we introduce a novel attention-based encoder and decoder that surpasses the paper's initial results, and also perform loss ablations and model robustness experiments.
 
 ## Chosen Result
 We chose to replicate the paper's Div2K resulting metrics on depths=1,3,6 for all Basic, Residual, and Dense encoders.
@@ -30,7 +30,7 @@ Important folders:
 - `crop_real_images.py` - processes real images to be normalized and center cropped to 360x360 to match steganographic generation. Should be run when making folders for StegExpose
 - `critic.py` - contains the complete critic implementation
 - `datasetloader.py` - loads in data (from a given data directory), and performs transformations (such as cropping) as described in the paper
-- `evaluate.py` - contains evluation functions for the 4 metrics: Decoding Accuracy, Reed Solomon Bits Per Pixel (RS-BPP), Peak Signal to Noise Ratio (PSNR), and Structural Similarity Index (SSIM)
+- `evaluate.py` - contains evaluation functions for the 4 metrics: Decoding Accuracy, Reed Solomon Bits Per Pixel (RS-BPP), Peak Signal to Noise Ratio (PSNR), and Structural Similarity Index (SSIM)
 - `encode_decode_message.py` - end-to-end demonstration that encodes an English message into a cover image using a trained encoder, saves the stego image and residual, then decodes and verifies recovery with bit accuracy reporting
 - `generate_eval_images.py` - given a directory of cover images, generates steganographic versions and residuals for visualization
 - `grayscale_blur_ablation.py` - performs our model robustness experiment, where we provide grayscale and blurred images to the model to understand (1) whether the model is able to perform on OOD images and (2) how the model hides messages in these new types of images
@@ -39,7 +39,7 @@ Important folders:
 /data - mainly contains DIV2K validation, and test data used for evaluation
 - since the full datasets are too large to upload to github, we've included instructions on how to download the data in the README.md in the /data folder
 - `/DIV2K_valid_HR` - contains our validation dataset of 100 images from DIV2K used to evaluate our main table of metrics
-- `/coco_val_images` - contains the 100 images from COCO used for StegExpose evaluation. Also containts a notebook `coco_100_images.ipynb` to download these images.
+- `/coco_val_images` - contains the 100 images from COCO used for StegExpose evaluation. Also contains a notebook `coco_100_images.ipynb` to download these images.
 - `profs` - contains images of our professors! (used in our poster)
 - `profs_outputs/Dense_D=1` - contains steganographic images and residuals for our professors with the Dense model at Depth=1 (also used in our poster)
 - `test_dense1`, `test_dense3`, `test_dense6` - contains the processed COCO cover and steganographic images used for our StegExpose evaluation
@@ -63,7 +63,7 @@ To reproduce the StegExpose plot, you will have to download the tool code: https
 
 We also provide the test sets we used for our ROC AUC plot as test_dense1, test_dense3, test_dense6.
 
- You can then run StegExpose with your the test image folder and use /code/plot_stegexpose_rocauc.py to create your ROC AUC plot.
+ You can then run StegExpose with your test image folder and use /code/plot_stegexpose_rocauc.py to create your ROC AUC plot.
 
 We used a T4 GPU in Google Colab. Training for 32 epochs took about 80 minutes per model config.
 
@@ -83,7 +83,7 @@ Overall, this repo provides a working SteganoGAN re-implementation with training
 
 
 ## Conclusion
-Our implementation of SteganoGAN successfully replicates and even improves upon the original paper's results with our new Attention Encoder and Decoder. We achieved the highest metrics across the board on Acc, RS-BPP, PSNR, and SSIM compared to the paper's original implementation. We learned that appropriate scaling of the losses is necessary to achieve high image realness, while maintaing a level of decodability of messages. As a result, one of the most important things we discovered during this project was a tradeoff at the pareto-optimal frontier between accuracy metrics with respect to how well a message can be decoded (Accuracy and RS-BPP) and the fidelity metrics (PSNR and SSIM). These results can also be interpretted visually (in addition to metrics): images with higher decode accuracy tend to look tampered (grainy), while images with higher fidelity look more real, but make it harder to locate and decode messages. We also noticed that at higher depths (larger message), the model struggles with encoding more information impercievably, which makes sense since the model's task is to now hide more bits per pixel, and the more modification to an image, the more likely it looks tampered with. Finally, through our evaluation ablations, we noted that our models are able to adapt to out of distribution (OOD) images, through evaluation on COCO, grayscale, and blurred images, and hid the message differently in each type of image.
+Our implementation of SteganoGAN successfully replicates and even improves upon the original paper's results with our new Attention Encoder and Decoder. We achieved the highest metrics across the board on Acc, RS-BPP, PSNR, and SSIM compared to the paper's original implementation. We learned that appropriate scaling of the losses is necessary to achieve high image realness, while maintaining a level of decodability of messages. As a result, one of the most important things we discovered during this project was a tradeoff at the pareto-optimal frontier between accuracy metrics with respect to how well a message can be decoded (Accuracy and RS-BPP) and the fidelity metrics (PSNR and SSIM). These results can also be interpreted visually (in addition to metrics): images with higher decode accuracy tend to look tampered (grainy), while images with higher fidelity look more real, but make it harder to locate and decode messages. We also noticed that at higher depths (larger message), the model struggles with encoding more information imperceptibly, which makes sense since the model's task is to now hide more bits per pixel, and the more modification to an image, the more likely it looks tampered with. Finally, through our evaluation ablations, we noted that our models are able to adapt to out of distribution (OOD) images, through evaluation on COCO, grayscale, and blurred images, and hid the message differently in each type of image.
 
 ## References
 [1] Zhang, Kevin Alex, et al. "SteganoGAN: High Capacity Image Steganography with GANs." arXiv preprint arXiv:1901.03892 (2019).
