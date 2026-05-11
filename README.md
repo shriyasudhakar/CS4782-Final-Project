@@ -11,10 +11,11 @@ In addition to reproducing their main result on the DIV2K dataset, we introduce 
 ## Chosen Result
 We chose to replicate the paper's Div2K resulting metrics on depths=1,3,6 for all Basic, Residual, and Dense encoders.
 <img width="1378" height="277" alt="image" src="https://github.com/user-attachments/assets/d5aafd99-0c9b-4385-ad47-46f776041a88" />
+Table: Comparison of 4 key metrics against different encoders, performed on the DIV2K dataset [Zhang et al. 2019]
 
 We also used StegExpose, a classic open-source steganalysis tool, to evaluate the detection performance of all model types implemented, replicating Figure 5. Note that we only used 50 samples to replicate this result and plotted depths=1,3,6 while the paper used 1000 samples and plotted depth 6.
 <img width="708" height="796" alt="image" src="https://github.com/user-attachments/assets/67dd2b7b-5fc8-420c-87fd-d6a10ed8d7bf" />
-Table: Comparison of 4 key metrics against different encoders, performed on the DIV2K dataset [Zhang et al. 2019]
+
 
 
 ## GitHub Contents
