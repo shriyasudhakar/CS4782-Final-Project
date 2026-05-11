@@ -71,4 +71,4 @@ Our implementation of SteganoGAN successfully replicates and even improves upon 
 [5] Lin, T., et al. “Microsoft COCO: common objects in context.” arXiv preprint arXiv:1405.0312 (2014). 
 
 ## Acknowledgements
-This project was undertaken for the final course project in CS 4782: Introduction to Deep Learning at Cornell University in Spring 2026. We thank the professors and course staff for their time and advising throughout the semester.
+This project was undertaken for the final course project in CS 4782: Introduction to Deep Learning at Cornell University in Spring 2026. We thank the professors and course staff for their time and advising throughout the semester. We also thank the authors of SteganoGAN for setting up a SoTA result in steganography, and also setting the stage for future deep-learning papers in the field, inspiring our own additional works with novel encoders, decoders, and experiments.
