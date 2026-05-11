@@ -23,13 +23,13 @@ Important folders:
 /code - contains main components of model like encoders, decoders, and critic
 - `train.ipynb` - Python notebook in which users can train configurations of models to replicate Table 1 from the original paper. It contains all necessary code, including encoders, decoders, critics, train loop, etc.
 - `train_attentionencoder.ipynb` - notebook specifically meant for our encoder and decoder ablation using Attention.
-- `encoders.py` - contains all 3 main types of decoders: Basic, Dense, and Residual
+- `encoders.py` - contains all 3 main types of decoders from the paper: Basic, Dense, and Residual
 - `attn_encoder.py` - contains the implementation of our novel attention encoder
 - `attn_decoder.py` - contains the implementation of our novel attention decoder
 - `decoder.py` - contains the main decoder that the paper described
 - `critic.py` - contains the complete critic implementation
 - `datasetloader.py` - loads in data (from a given data directory), and performs transformations (such as cropping) as described in the paper
-- `evaluate.py` -
+- `evaluate.py` - contains evluation functions for the 4 metrics: Decoding Accuracy, Reed Solomon Bits Per Pixel (RS-BPP), Peak Signal to Noise Ratio (PSNR), and Structural Similarity Index (SSIM)
 - `encode_decode_message.py` -
 - `generate_eval_images.py` -
 - `grayscale_blur_ablation.py` - performs our model robustness experiment, where we provide grayscale and blurred images to the model to understand (1) whether the model is able to perform on OOD images and (2) how the model hides messages in these new types of images
@@ -38,19 +38,19 @@ Important folders:
 - since the datasets are too large to upload to github, we've included instructions on how to download the data in the README.md in the /data folder
 
 /results
-- contains our main replication of table 1 (`table_metrics.png`), as well as results from the StegExpose tool (`stegexpose.png`).
+- contains our main replication of table 1 (`table_metrics.png`) along with various training experiments (scaling MSE and removing critic), as well as results from the StegExpose tool (`stegexpose.png`).
 
 /poster
 - `SteganoGAN CS 4782.pdf` contains our poster that was presented at the final poster session
 
 /report
-- `steganogan_twopager.pdf` contains our detailed final report and analysis
+- `steganogan_twopager.pdf` contains our final report and analysis
 
 ## Re-implementation Details
 We implemented the core encoder, decoder, critic framework. The encoder hides a binary message inside a provided cover image, the decoder recovers said message, and a critic (discriminator in GANs), pushes images to look like real images. We trained three encoder variances: Basic (sequential convolutions), Residual (adds cover image as skip connection), and Dense (concatenates intermediate feature maps). We implemented the DenseDecoder (only one decoder in paper, uses convolutions), Critic (also uses convolutions). We trained on the DIV2K dataset (800 train, 100 validation images) for 32 epochs with Adam at lr=1e-4. We evaluated 4 different accuracy metrics (Decoder Accuracy, RS-BPP, PSNR, SSIM) across 3 data depths D={1, 3, 6}. Initially during training, we noticed that while our Acc and RS-BPP metrics were high, PSNR and SSIM (image realness) were lower than expected (as compared to the paper). We performed ablations modifying the loss (100x MSE scaling, critic removal) and noticed much improved performance, meeting the paper's results on all 4 metrics. Beyond reproducing these main results from the paper, we also introduce a novel Attention encoder and decoder, which extends the existing Dense architecture with Window Multi-Head Self Attention (8x8 windows, 3 heads), and also performs the best comapred to the 3 architectures proposed initially. We evaluated the robustness of our models to image distribution shifts (StegExpose on COCO images), and tested adaptability on grayscale and blurred images.
 
 ## Reproduction Steps
-Run our training script in /code/train.ipynb which will download data locally and install necessary libraries, preprocess images, and run the training loop. It also has all our model architecture and supports wandb logging for evaluation metrics. Our notebook does multiple runs with different Encoders and different depths so you can reproduce our table of results.
+To train your own SteganoGAN, run our training script in /code/train.ipynb which will download the Div2K data locally and install necessary libraries, preprocess images, and run the training loop. It also has all our model architecture and supports wandb logging for evaluation metrics. Our notebook does multiple runs with different Encoders and different depths so you can reproduce our table of results or make your own by changing the list of configs in the config loop in the last cell. You will need a wandb login and API key before beginning and to change SAVE_DIR to the correct GDrive path in which you would like to save the model weights.
 
 To reproduce the StegExpose plot, you will have to download the tool code: https://github.com/b3dk7/stegexpose. You can use the 100 validation images in /data/coco_val_images. Run /data/crop_real_images.py to process the real images, and code/generate_eval_images.py to generate steganographic versions. Then combine the first 50 real images and the last 50 steganographic images to create your test set. (We also provide our test sets as test_dense1, test_dense3, test_dense6)
 
