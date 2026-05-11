@@ -68,6 +68,8 @@ We found that scaling the image MSE loss by 100, as done in the original codebas
 
 For steganalysis, the paper reported a StegExpose auROC of 0.59 for Dense depth 6. Our model achieved 0.76 on COCO images after training on DIV2K, meaning it was easier to detect under distribution shift. This suggests broader training data may be needed for real-world robustness.
 
+For the blurred and grayscale image ablations, we visualized residuals to see where the model stored the hidden message. Grayscale images spread the message more evenly across channels and focused on edges, while blurred images relied more on color channels and avoided sharp edge artifacts. Overall, the model generalized well. It was also easier to hide messages in blurry images while maintaining the realness.
+
 Overall, this repo provides a working SteganoGAN re-implementation with training, evaluation, StegExpose testing, and additional architecture/ablation experiments.
 
 
