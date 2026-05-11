@@ -3,5 +3,4 @@ code/__pycache__
 data/DIV2K*
 data/COCO_valid_HR_outputs
 /venv/
-checkpoints
 real/

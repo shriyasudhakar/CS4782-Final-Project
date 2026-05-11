@@ -13,15 +13,15 @@ valid split:
 !wget -c http://data.vision.ee.ethz.ch/cvl/DIV2K/DIV2K_valid_HR.zip
 !unzip DIV2K_valid_HR.zip
 
-remove zips after unziping (save some disk space):
+remove zips after unzipping (save some disk space):
 !rm -r DIV2K_train_HR.zip
 !rm -r DIV2K_valid_HR.zip
 
 ## Download onto machine
-curl -L -O wget -c http://data.vision.ee.ethz.ch/cvl/DIV2K/DIV2K_train_HR.zip
+curl -L -O http://data.vision.ee.ethz.ch/cvl/DIV2K/DIV2K_train_HR.zip
 unzip DIV2K_train_HR.zip
 
-curl -L -O wget -c http://data.vision.ee.ethz.ch/cvl/DIV2K/DIV2K_valid_HR.zip
+curl -L -O http://data.vision.ee.ethz.ch/cvl/DIV2K/DIV2K_valid_HR.zip
 unzip DIV2K_valid_HR.zip
 
 
@@ -31,7 +31,7 @@ For our StegExpose comparisons, we are using the 2017 Validation split. The zip 
 You can use our Jupyter Notebook at /coco_val_images/coco_100_images.ipynb to download the same 100 images we used for evaluation.
 
 ## Download onto machine
-curl -L -O wget -c [http://data.vision.ee.ethz.ch/cvl/DIV2K/DIV2K_train_HR.zip](http://images.cocodataset.org/zips/val2017.zip.)
+curl -L -O http://images.cocodataset.org/zips/val2017.zip
 unzip val2017.zip
 
 

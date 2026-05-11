@@ -2,6 +2,8 @@
 Shriya Sudhakar (ss3576), Kiran Mitra (km936), Nidhi Soma (ns848), Niti Goyal (ng459)
 
 ## Introduction
+This repository is a re-implementation of SteganoGAN undertaken as part of CS 4782: Introduction to Deep Learning at Cornell University (Spring 2026).
+
 Image steganography is at the intersection of security and computer vision, where the main goal is to be able to hide secret messages inside images imperceptibly. Encoding binary data into natural images is quite difficult due to the need of balancing message capacity, visual authenticity, and evasion of steganographic detection tools.
 
 This repository reimplements [SteganoGAN: High Capacity Image Steganography with GANs](https://arxiv.org/pdf/1901.03892) by Zhang et al., 2019, which introduces a GAN-based method for high-capacity image steganography. The encoder hides a message in the cover image, while a decoder recovers it. The critic encourages steganographic images to look indistinguishable from the original cover image. The authors test three types of encoders (Basic, Residual, Dense), and achieve a record payload of 4.4 bits per pixel for natural images from multiple datasets that evade detection by traditional and deep-learning-based steganalysis tools.
@@ -19,6 +21,8 @@ We also used StegExpose, a classic open-source steganalysis tool, to evaluate th
 
 
 ## GitHub Contents
+`requirements.txt` - all Python dependencies; install with `pip install -r requirements.txt`
+
 Important folders:
 /code - contains main components of model like encoders, decoders, and critic
 - `train.ipynb` - Python notebook in which users can train configurations of models to replicate Table 1 from the original paper. It contains all necessary code, including encoders, decoders, critics, train loop, etc.
@@ -44,6 +48,8 @@ Important folders:
 - `profs_outputs/Dense_D=1` - contains steganographic images and residuals for our professors with the Dense model at Depth=1 (also used in our poster)
 - `test_dense1`, `test_dense3`, `test_dense6` - contains the processed COCO cover and steganographic images used for our StegExpose evaluation
 
+/checkpoints - contains pre-trained model weights for all encoder types (Basic, Residual, Dense, Attention) at depths 1, 3, 6, including ablation variants (`/with_scaling`, `/no_critic`). Scripts in `/code` load from this folder by default.
+
 /results
 - contains our main replication of table 1 (`table_metrics.png`) along with various training experiments (scaling MSE and removing critic), as well as results from the StegExpose tool (`stegexpose.png`).
 
@@ -57,15 +63,17 @@ Important folders:
 We implemented the core encoder, decoder, critic framework. The encoder hides a binary message inside a provided cover image, the decoder recovers said message, and a critic (discriminator in GANs), pushes images to look like real images. We trained three encoder variances: Basic (sequential convolutions), Residual (adds cover image as skip connection), and Dense (concatenates intermediate feature maps). We implemented the DenseDecoder (only one decoder in paper, uses convolutions), Critic (also uses convolutions). We trained on the DIV2K dataset (800 train, 100 validation images) for 32 epochs with Adam at lr=1e-4. We evaluated 4 different accuracy metrics (Decoder Accuracy, RS-BPP, PSNR, SSIM) across 3 data depths D={1, 3, 6}. Initially during training, we noticed that while our Acc and RS-BPP metrics were high, PSNR and SSIM (image realness) were lower than expected (as compared to the paper). We performed ablations modifying the loss (100x MSE scaling, critic removal) and noticed much improved performance, meeting the paper's results on all 4 metrics. Beyond reproducing these main results from the paper, we also introduce a novel Attention encoder and decoder, which extends the existing Dense architecture with Window Multi-Head Self Attention (8x8 windows, 3 heads), and also performs the best compared to the 3 architectures proposed initially. We evaluated the robustness of our models to image distribution shifts (StegExpose on COCO images), and tested adaptability on grayscale and blurred images.
 
 ## Reproduction Steps
-To train your own SteganoGAN, run our training script in /code/train.ipynb which will download the Div2K data locally and install necessary libraries, preprocess images, and run the training loop. To train with our novel attention encoder/decoder, use /code/train_attentionencoder.ipynb. It also has all our model architecture and supports wandb logging for evaluation metrics. Our notebook does multiple runs with different Encoders and different depths so you can reproduce our table of results or make your own by changing the list of configs in the config loop in the last cell. You will need a wandb login and API key before beginning and to change SAVE_DIR to the correct GDrive path in which you would like to save the model weights.
 
-To reproduce the StegExpose plot, you will have to download the tool code: https://github.com/b3dk7/stegexpose. You can use the 100 validation images in /data/coco_val_images. Run /code/crop_real_images.py to process the real images, and code/generate_eval_images.py to generate steganographic versions (you may have to modify the paths for your local setup). Then combine the first 50 real images and the last 50 steganographic images to create your test set. 
+**Dependencies:** Install required libraries with:
+```bash
+pip install -r requirements.txt
+```
 
-We also provide the test sets we used for our ROC AUC plot as test_dense1, test_dense3, test_dense6.
+**Computational resources:** A GPU is required. All experiments were run on a T4 GPU in Google Colab. Training for 32 epochs takes approximately 80 minutes per model config.
 
- You can then run StegExpose with your test image folder and use /code/plot_stegexpose_rocauc.py to create your ROC AUC plot.
+**Training:** To train your own SteganoGAN, run our training script in /code/train.ipynb which will download the DIV2K data locally, preprocess images, and run the training loop. To train with our novel attention encoder/decoder, use /code/train_attentionencoder.ipynb. It also has all our model architecture and supports wandb logging for evaluation metrics. Our notebook does multiple runs with different Encoders and different depths so you can reproduce our table of results or make your own by changing the list of configs in the config loop in the last cell. You will need a wandb login and API key before beginning and to change SAVE_DIR to the correct GDrive path in which you would like to save the model weights.
 
-We used a T4 GPU in Google Colab. Training for 32 epochs took about 80 minutes per model config.
+**StegExpose evaluation:** To reproduce the StegExpose plot, you will have to download the tool code: https://github.com/b3dk7/stegexpose. You can use the 100 validation images in /data/coco_val_images. Run /code/crop_real_images.py to process the real images, and /code/generate_eval_images.py to generate steganographic versions (you may have to modify the paths for your local setup). Then combine the first 50 real images and the last 50 steganographic images to create your test set. We also provide the test sets we used for our ROC AUC plot as test_dense1, test_dense3, test_dense6. You can then run StegExpose with your test image folder and use /code/plot_stegexpose_rocauc.py to create your ROC AUC plot.
 
 ## Results/Insights
 
