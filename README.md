@@ -42,14 +42,14 @@ Important folders:
 
 **/checkpoints** - contains pre-trained model weights for all encoder types (Basic, Residual, Dense, Attention) at depths 1, 3, 6, including ablation variants (`/with_scaling`, `/no_critic`). Scripts in `/code` load from this folder by default.
 
-**/results
-**- contains our main replication of table 1 (`table_metrics.png`) along with various training experiments (scaling MSE and removing critic), as well as results from the StegExpose tool (`stegexpose.png`).
+**/results**
+- contains our main replication of table 1 (`table_metrics.png`) along with various training experiments (scaling MSE and removing critic), as well as results from the StegExpose tool (`stegexpose.png`).
 
-**/poster
-**- `SteganoGAN CS 4782.pdf` contains our poster that was presented at the final poster session
+**/poster**
+- `SteganoGAN CS 4782.pdf` contains our poster that was presented at the final poster session
 
-**/report
-**- `steganogan_2page_report.pdf` contains our final report and analysis
+**/report**
+- `steganogan_2page_report.pdf` contains our final report and analysis
 
 ## Re-implementation Details
 
