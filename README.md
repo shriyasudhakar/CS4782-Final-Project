@@ -17,7 +17,9 @@ We also used StegExpose, a classic open-source steganalysis tool, to evaluate th
 
 Important folders:
 **/code** - contains main components of model like encoders, decoders, and critic
-**- `train.ipynb` - Python notebook in which users can train configurations of models to replicate Table 1 from the original paper. It contains all necessary code, including encoders, decoders, critics, train loop, etc.**
+- **`train.ipynb` - Python notebook in which users can train configurations of models to replicate Table 1 from the original paper. It contains all necessary code, including encoders, decoders, critics, train loop, etc.**
+
+
 - `train_attentionencoder.ipynb` - notebook specifically meant for our encoder and decoder ablation using Attention.
 - `encoders.py` - contains all 3 main types of decoders from the paper: Basic, Dense, and Residual
 - `attn_encoder.py` - contains the implementation of our novel attention encoder
